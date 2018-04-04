@@ -1,6 +1,8 @@
 package com.client;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
@@ -22,23 +24,23 @@ import network.ChunkMessage;
  *
  */
 public class Client implements ClientInterface {
-	//public static ChunkServer cs;
-	private ObjectInputStream ois;
-	private ObjectOutputStream oos;
-	private BufferedReader br;
-	Socket s;
+	private static ObjectInputStream ois;
+	private static ObjectOutputStream oos;
+	private static DataOutputStream dos;
+	private static DataInputStream dis;
+	static Socket s;
 	
 	/**
 	 * Initialize the client
 	 */
 	public Client(int port, String hostname){
-		//cs = new ChunkServer(port);
-		//System.out.println("Starting client");
 		s = null;
 		try {
 			s = new Socket(hostname, port);
 			oos = new ObjectOutputStream(s.getOutputStream());
 			ois = new ObjectInputStream(s.getInputStream());
+			dos = new DataOutputStream(oos);
+			dis = new DataInputStream(ois);
 			System.out.println("Connected!");
 			
 		} catch (IOException ioe) {
@@ -50,19 +52,21 @@ public class Client implements ClientInterface {
 	 * Create a chunk at the chunk server from the client side.
 	 */
 	public String initializeChunk() {
-		ChunkMessage message = new ChunkMessage("initializeChunk", "", 0);
+		String handle = "";
 		try {
-			oos.writeObject(message);
-			oos.flush();
-			message = (ChunkMessage)ois.readObject();
+			dos.writeInt(-1);
+			dos.flush();
+			int length = dis.readInt();                  
+			byte[] message = new byte[length];
+			dis.readFully(message, 0, message.length);
+			handle = new String(message);
+			return handle;
 		} catch (IOException e) {
 			System.out.println("I/O Exception in initializeChunk");
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			System.out.println("Class Not Found Exception");
-			e.printStackTrace();
 		}
-		return message.getChunkHandle();
+		
+		return handle;
 	}
 	
 	/**
@@ -73,27 +77,35 @@ public class Client implements ClientInterface {
 			System.out.println("The chunk write should be within the range of the file, invalide chunk write!");
 			return false;
 		}
-		ChunkMessage message = new ChunkMessage("putChunk", ChunkHandle, offset);
-		message.setPayload(payload);
+		
 		try {
-			oos.writeObject(message);
-			oos.flush();
-			message = (ChunkMessage)ois.readObject();
-			if(message.getName().equals("true")) {
+			dos.writeInt(payload.length);
+			dos.flush();
+			dos.write(payload);
+			dos.flush();
+			byte[] chunk = ChunkHandle.getBytes();
+			dos.writeInt(1);
+			dos.flush();
+			dos.writeInt(chunk.length);
+			dos.flush();
+			dos.write(chunk);
+			dos.flush();
+			
+			dos.writeInt(offset);
+			dos.flush();
+			int success = dis.readInt();
+
+			if(success == 1) {
 				return true;
 			}
 			else {
 				return false;
 			}
-		} catch (IOException e) {
-			System.out.println("I/O Exception in putChunk");
-			e.printStackTrace();
-			return false;
-		} catch (ClassNotFoundException e) {
-			System.out.println("Class Not Found Exception");
-			e.printStackTrace();
+		} catch (IOException e1) {
 			return false;
 		}
+		
+		
 	}
 	
 	/**
@@ -104,21 +116,33 @@ public class Client implements ClientInterface {
 			System.out.println("The chunk read should be within the range of the file, invalide chunk read!");
 			return null;
 		}
-		ChunkMessage message = new ChunkMessage("getChunk", ChunkHandle, offset);
-		message.setNumberOfBytes(NumberOfBytes);
+		byte[] payload = null;
 		try {
-			oos.writeObject(message);
-			oos.flush();
-			message = (ChunkMessage)ois.readObject();
+			dos.writeInt(0);
+			dos.flush();
+			dos.writeInt(2);
+			byte[] chunk = ChunkHandle.getBytes();
+			dos.writeInt(chunk.length);
+			dos.flush();
+			dos.write(chunk);
+			dos.flush();
 			
-		} catch (IOException e) {
-			System.out.println("I/O Exception in getChunk");
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			System.out.println("Class Not Found Exception");
-			e.printStackTrace();
+			dos.writeInt(offset);
+			dos.flush();
+			
+			dos.writeInt(NumberOfBytes);
+			dos.flush();
+			
+			int length = dis.readInt();
+			payload = new byte[length];
+			dis.readFully(payload, 0, payload.length);
+			
+			return payload;
+
+		} catch (IOException e1) {
+			return payload;
 		}
-		return message.getPayload();
+		
 	}
 	
 	public void closeSocket() {

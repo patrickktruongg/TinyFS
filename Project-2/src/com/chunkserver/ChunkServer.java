@@ -1,18 +1,23 @@
 package com.chunkserver;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
-//import java.util.Arrays;
 import java.util.Vector;
 
 import com.interfaces.ChunkServerInterface;
 
+import network.ChunkMessage;
 import network.ServerThread;
 
 /**
@@ -24,11 +29,9 @@ import network.ServerThread;
 
 
 public class ChunkServer implements ChunkServerInterface {
-	final static String filePath = "csci485/";	//or C:\\newfile.txt
+	final static String filePath = "csci485//";	//or C:\\newfile.txt
 	public static long counter;
-	private static boolean connected;
-	private transient BufferedReader br;
-	private Vector<ServerThread> serverThreads;
+	private static ServerSocket ss;
 	
 	/**
 	 * Initialize the chunk server
@@ -48,38 +51,17 @@ public class ChunkServer implements ChunkServerInterface {
 			counter = cntrs[cntrs.length - 1];
 		}
 		
-		ServerSocket ss = null;
-		connected = false;
-		serverThreads = new Vector<ServerThread>();
-		br = new BufferedReader(new InputStreamReader(System.in));
+		ss = null;
 		try {
-			//System.out.println("Please enter the port to host the server.");
-			//String line = br.readLine();
-			//int port = Integer.parseInt(line);
 			ss = new ServerSocket(port);
-			connected = true;
-			System.out.println("Server started!");
-			while (true) {
-				System.out.println("waiting for connection...");
-				Socket s = ss.accept();
-				System.out.println("connection from " + s.getInetAddress());
-				ServerThread st = new ServerThread(s, this);
-				serverThreads.add(st);
-			}
-		} catch (NumberFormatException nfe){
-			System.out.print("Invalid port (nfe error).");
-		} catch (IOException ioe) {
-			System.out.print("Invalid port (i/o error).");
-		} finally {
-			if (ss != null) {
-				try {
-					ss.close();
-				} catch (IOException ioe) {
-					System.out.println("ioe closing ss: " + ioe.getMessage());
-				}
-			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Port exception");
+			e.printStackTrace();
 		}
+		
 	}
+	
 	
 	/**
 	 * Each chunk is corresponding to a file.
@@ -131,8 +113,130 @@ public class ChunkServer implements ChunkServerInterface {
 	}
 	
 	public static void main(String [] args) {
-		while(!connected){
-			new ChunkServer(5656);
+		ChunkServer cs = new ChunkServer(5656);
+		System.out.println("Server started!");
+		while (true) {
+			Socket s = null;
+			ObjectOutputStream oos = null;
+			ObjectInputStream ois = null;
+			try {
+				System.out.println("waiting for connection...");
+				s = ss.accept();
+				System.out.println("connection from " + s.getInetAddress());
+				oos = new ObjectOutputStream(s.getOutputStream());
+				ois = new ObjectInputStream(s.getInputStream());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}		
+
+			while(!s.isClosed()) {
+				DataOutputStream dos = new DataOutputStream(oos);
+				DataInputStream dis = new DataInputStream(ois);
+				
+				try {
+					int length = dis.readInt();
+					if(length>-1) {
+						byte[] payload = null;
+						if(length > 0) {
+							payload = new byte[length];
+						    dis.readFully(payload, 0, payload.length); // read the message
+						}    
+					    int code = dis.readInt();
+					    if(code == 1) {
+					    		int handleLength = dis.readInt();
+					    		byte[] handle = new byte[handleLength];
+					    		dis.readFully(handle, 0, handle.length);
+					    		String chunkHandle = new String(handle);
+					    		int offset = dis.readInt();
+					    		boolean success = cs.putChunk(chunkHandle, payload, offset);
+					    		if(success) {
+					    			dos.writeInt(1);
+					    			dos.flush();
+					    		}
+					    		else {
+					    			dos.writeInt(0);
+					    			dos.flush();
+					    		}
+					    }
+					    else if(code == 2) {
+					    		//String ChunkHandle, int offset, int NumberOfBytes
+					    		int handleLength = dis.readInt();
+					    		byte[] handle = new byte[handleLength];
+					    		dis.readFully(handle, 0, handle.length);
+					    		String chunkHandle = new String(handle);
+					    		int offset = dis.readInt();
+					    		int numberOfBytes = dis.readInt();
+					    		byte[] value = cs.getChunk(chunkHandle, offset, numberOfBytes);
+					    		dos.writeInt(value.length);
+					    		dos.flush();
+					    		dos.write(value);
+					    		dos.flush();
+					    }
+					}
+					else {
+						String chunk = cs.initializeChunk();
+						byte[] b = chunk.getBytes();
+						dos.writeInt(b.length); // write length of the payload
+						dos.write(b);           // write the payload
+						dos.flush();
+					}
+					
+				} catch (IOException e1) {
+					//e1.printStackTrace();
+					break;
+				}
+				/*
+				ChunkMessage message = null;
+				try {
+					message = (ChunkMessage)ois.readObject();
+				} catch (ClassNotFoundException e) {
+					//e.printStackTrace();
+					break;
+				} catch (IOException e) {
+					//e.printStackTrace();
+					break;
+				}
+				if(message.getName().equals("initializeChunk")) {
+					String chunk = cs.initializeChunk();
+					message.setChunkHandle(chunk);
+					try {
+						oos.writeObject(message);
+						oos.flush();
+					} catch (IOException e) {
+						//e.printStackTrace();
+						break;
+					}
+				}
+				else if(message.getName().equals("putChunk")){
+					boolean success = cs.putChunk(message.getChunkHandle(), message.getPayload(), message.getOffset());
+					if(success) {
+						message.setName("true");
+					}
+					else {
+						message.setName("false");
+					}
+					try {
+						oos.writeObject(message);
+						oos.flush();
+					} catch (IOException e) {
+						//e.printStackTrace();
+						break;
+					}
+				}
+				else if(message.getName().equals("getChunk")) {
+					byte[] bytes = cs.getChunk(message.getChunkHandle(), message.getOffset(), message.getNumberOfBytes());
+					message.setPayload(bytes);
+					try {
+						oos.writeObject(message);
+						oos.flush();
+					} catch (IOException e) {
+						//e.printStackTrace();
+						break;
+					}
+				}
+				*/
+			}
 		}
 	}
 

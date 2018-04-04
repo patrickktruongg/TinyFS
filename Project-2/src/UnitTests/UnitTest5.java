@@ -53,6 +53,7 @@ public class UnitTest5 {
 			}
 		}
 		output.close();
+		client.closeSocket();
 		//compare the contents of both files and determine whether they are the same
 		boolean isSame = FileUtils.contentEquals(fin, fout);
 		if(isSame == true){

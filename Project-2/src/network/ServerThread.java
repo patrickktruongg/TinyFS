@@ -39,7 +39,6 @@ public class ServerThread extends Thread implements Serializable{
 		try {
 			while(true) {
 				ChunkMessage message = (ChunkMessage)ois.readObject();
-				//System.out.println("Received message: " + message.getMessage());
 				if(message.getName().equals("initializeChunk")) {
 					String chunk = cs.initializeChunk();
 					message.setChunkHandle(chunk);
@@ -62,9 +61,9 @@ public class ServerThread extends Thread implements Serializable{
 				}
 			}
 		} catch (ClassNotFoundException cnfe) {
-			System.out.println("cnfe in run: " + cnfe.getMessage());
+			
 		} catch (IOException ioe) {
-			System.out.println("ioe in run: " + ioe.getMessage());
+			
 		}
 	}
 	

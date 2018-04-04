@@ -36,11 +36,13 @@ public class UnitTest1 {
         //Create the chunk and store its handle
         Client client = new Client(5656, "localhost");
         handle = client.initializeChunk();
+        //System.out.println("Initialized chunk");
         if(handle == null){
         	System.out.println("Unit test 1 result: fail!");
         	return;
         }
         isSuccess = client.putChunk(handle, payload, 0);
+        //System.out.println("Put chunk");
         if(isSuccess == true){
         	System.out.println("Unit test 1 result: success!");
         }else{
