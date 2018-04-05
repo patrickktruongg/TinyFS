@@ -126,8 +126,7 @@ public class ChunkServer implements ChunkServerInterface {
 				oos = new ObjectOutputStream(s.getOutputStream());
 				ois = new ObjectInputStream(s.getInputStream());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//e.printStackTrace();
 			}		
 
 			while(!s.isClosed()) {
@@ -186,56 +185,7 @@ public class ChunkServer implements ChunkServerInterface {
 					//e1.printStackTrace();
 					break;
 				}
-				/*
-				ChunkMessage message = null;
-				try {
-					message = (ChunkMessage)ois.readObject();
-				} catch (ClassNotFoundException e) {
-					//e.printStackTrace();
-					break;
-				} catch (IOException e) {
-					//e.printStackTrace();
-					break;
-				}
-				if(message.getName().equals("initializeChunk")) {
-					String chunk = cs.initializeChunk();
-					message.setChunkHandle(chunk);
-					try {
-						oos.writeObject(message);
-						oos.flush();
-					} catch (IOException e) {
-						//e.printStackTrace();
-						break;
-					}
-				}
-				else if(message.getName().equals("putChunk")){
-					boolean success = cs.putChunk(message.getChunkHandle(), message.getPayload(), message.getOffset());
-					if(success) {
-						message.setName("true");
-					}
-					else {
-						message.setName("false");
-					}
-					try {
-						oos.writeObject(message);
-						oos.flush();
-					} catch (IOException e) {
-						//e.printStackTrace();
-						break;
-					}
-				}
-				else if(message.getName().equals("getChunk")) {
-					byte[] bytes = cs.getChunk(message.getChunkHandle(), message.getOffset(), message.getNumberOfBytes());
-					message.setPayload(bytes);
-					try {
-						oos.writeObject(message);
-						oos.flush();
-					} catch (IOException e) {
-						//e.printStackTrace();
-						break;
-					}
-				}
-				*/
+				
 			}
 		}
 	}

@@ -26,6 +26,7 @@ public class TestReadAndWrite {
 	 */
 	public String[] createFile(File f) {
 		try {
+			System.out.println("Creating file!");
 			RandomAccessFile raf = new RandomAccessFile(f.getAbsolutePath(), "rw");
 			raf.seek(0);
 			long size = f.length();
@@ -44,6 +45,7 @@ public class TestReadAndWrite {
 			}
 			raf.close();
 			client.closeSocket();
+			System.out.println("Created file!");
 			return ChunkHandles;
 		} catch (IOException ie){
 			return null;
