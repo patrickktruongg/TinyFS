@@ -64,9 +64,15 @@ public class ClientFS {
 			return FSReturnVals.SrcDirNotExistent;
 		}
 		
-		//Check if the dirname exists and try to make one if not
+		//Check if dirname is empty, and if so delete otherwise through an error
 		File dir = new File(src + dirname);		
-		dir.delete();
+		File[] fs = dir.listFiles();
+		if(fs.length != 0) {
+			return FSReturnVals.DirNotEmpty;
+		}
+		else {
+			dir.delete();
+		}
 		
 		return FSReturnVals.Success;
 	}
@@ -80,7 +86,25 @@ public class ClientFS {
 	 * "/Shahram/CSCI485" to "/Shahram/CSCI550"
 	 */
 	public FSReturnVals RenameDir(String src, String NewName) {
-		return null;
+		
+		//Check if the directory src exists
+		File srcFile = new File(src);
+		if(!srcFile.exists()) {
+			return FSReturnVals.SrcDirNotExistent;
+		}
+		else {
+			File parent = srcFile.getParentFile();
+			File[] fs = parent.listFiles();
+			for(int i = 0; i < fs.length; i++) {
+				if(fs[i].getName().equals(NewName)) {
+					return FSReturnVals.DestDirExists;
+				}
+			}
+			File newPath = new File(parent.getPath() + NewName);
+			srcFile.renameTo(newPath);
+		}
+		
+		return FSReturnVals.Success;
 	}
 
 	/**
@@ -95,7 +119,7 @@ public class ClientFS {
 		File dir = new File(tgt);
 		File[] fs = dir.listFiles();
 		List<String> contents = new ArrayList<String>();
-		if(fs.length == 0 || !dir.exists()){
+		if(!dir.exists() || fs.length == 0){
 			return null;
 		}else{
 			//Read the contents of fs and then recursively read the children

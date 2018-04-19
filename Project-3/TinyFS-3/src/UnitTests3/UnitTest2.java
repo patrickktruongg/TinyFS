@@ -26,10 +26,10 @@ public class UnitTest2 {
 		
 		System.out.println(TestName + "DeleteDir(\"/Shahram/N\"), ListDir(\"/Shahram\") and verify direcotry N is gone (success)");
 		String dir1 = "Shahram";
-		FSReturnVals fsrv = cfs.DeleteDir("/" + dir1 + "/", String.valueOf(N));
-		String[] ret1 = cfs.ListDir("/" + dir1);
+		FSReturnVals fsrv = cfs.DeleteDir("csci485/" + dir1 + "/", String.valueOf(N));
+		String[] ret1 = cfs.ListDir("csci485/" + dir1);
 		
-		boolean isExist = isDirExist(ret1, "/" + dir1+"/"+N);
+		boolean isExist = isDirExist(ret1, "csci485/" + dir1+"/"+N);
 		if(isExist == true){
 			System.out.println("Unit test 2 result: fail!");
     		return;
@@ -37,21 +37,21 @@ public class UnitTest2 {
 		
 		System.out.println(TestName + "DeleteDir(\"/Ghandeharizadeh/1/2/.../N\"), ListDir(\"/Ghandeharizadeh/1/2/.../\") and verify directory N is gone (success)");
 		String dir2 = "Ghandeharizadeh";
-		String lastSec = "/" + dir2;
+		String lastSec = "csci485/" + dir2;
 		for(int i = 1; i < N; i++){
-			lastSec = lastSec + "/" + i;
+			lastSec = lastSec + "csci485/" + i;
 		}
-		fsrv = cfs.DeleteDir(lastSec + "/", String.valueOf(N));
+		fsrv = cfs.DeleteDir(lastSec + "csci485/", String.valueOf(N));
 		
 		String[] ret2 = cfs.ListDir(lastSec);
-		isExist = isDirExist(ret2, lastSec + "/" + N);
+		isExist = isDirExist(ret2, lastSec + "csci485/" + N);
 		if(isExist == true){
 			System.out.println("Unit test 2 result: fail!");
     		return;
 		}
 		
 		System.out.println(TestName + "DeleteDir(\"/Shahram\") and verify it return the correct failure code");
-		fsrv = cfs.DeleteDir("/", dir1);
+		fsrv = cfs.DeleteDir("csci485/", dir1);
 		if(fsrv == FSReturnVals.DirNotEmpty){
 			System.out.println("Good! Detected " + dir1 + " exists.");
 		} else {
@@ -60,7 +60,7 @@ public class UnitTest2 {
 		}
 		
 		System.out.println(TestName + "DeleteDir(\"/Ghandeharizadeh/1/2\") and verifty it returns the correct failure code");
-		fsrv = cfs.DeleteDir("/" + dir2 + "/1/", "2");
+		fsrv = cfs.DeleteDir("csci485/" + dir2 + "/1/", "2");
 		if(fsrv == FSReturnVals.DirNotEmpty){
 			System.out.println("Good!  Detected /" + dir2 + "/1/2 exists.");
 		} else {
@@ -70,7 +70,7 @@ public class UnitTest2 {
 		
 		System.out.println(TestName + "RenameDir(\"/Shahram/i\", \"/Shahram/1i\") for i from 1 to N-1.  ListDir(\"/Shahram\") and verify the N-1 returns dirs are 1i to (N-1)i");
 		for(int i = 1; i < N; i++){
-			fsrv = cfs.RenameDir("/" + dir1 + "/" + i, "/" + dir1 + "/" + i + "i");
+			fsrv = cfs.RenameDir("csci485/" + dir1 + "/" + i, "/" + dir1 + "/" + i + "i");
 			if( fsrv != FSReturnVals.Success){
 				System.out.println("Unit test 2 result: fail!");
 	    		return;
@@ -78,7 +78,7 @@ public class UnitTest2 {
 		}
 		
 		System.out.println(TestName + "RenameDir(\"/Ghandeharizadeh\", \"/ShahramGhandeharizadeh\")");
-		fsrv = cfs.RenameDir("/" + dir2, "/ShahramGhandeharizadeh");
+		fsrv = cfs.RenameDir("csci485/" + dir2, "/ShahramGhandeharizadeh");
 		if( fsrv != FSReturnVals.Success ){
 			System.out.println("Unit test 2 result: fail!");
     		return;
