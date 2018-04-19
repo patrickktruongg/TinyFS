@@ -20,7 +20,7 @@ public class UnitTest3 {
 
 		System.out.println(TestName + "CreateDir /ShahramGhandeharizadeh/CSCI485");
 		String dir1 = "ShahramGhandeharizadeh";
-		FSReturnVals fsrv = cfs.CreateDir("/" + dir1 + "/", "CSCI485");
+		FSReturnVals fsrv = cfs.CreateDir("csci485/" + dir1 + "/", "CSCI485");
 		if( fsrv != FSReturnVals.Success ){
 			System.out.println("Unit test 3 result: fail!");
     		return;
@@ -28,7 +28,7 @@ public class UnitTest3 {
 		
 		System.out.println(TestName + "CreateFile Lecture1/2/.../15 in /ShahramGhandeharizadeh/CSCI485");
 		for(int i = 1; i <= N; i++){
-			fsrv = cfs.CreateFile("/" + dir1 + "/CSCI485/", "Lecture" + i);
+			fsrv = cfs.CreateFile("csci485/" + dir1 + "/CSCI485/", "Lecture" + i);
 			if( fsrv != FSReturnVals.Success ){
 				System.out.println("Unit test 3 result: fail!");
 	    		return;
@@ -37,7 +37,7 @@ public class UnitTest3 {
 		
 		System.out.println(TestName + "DeleteFile Lecture1/2/.../15 in /ShahramGhandeharizadeh/CSCI485");
 		for(int i = 1; i <= N; i++){
-			fsrv = cfs.DeleteFile("/" + dir1 + "/CSCI485/", "Lecture" + i);
+			fsrv = cfs.DeleteFile("csci485/" + dir1 + "/CSCI485/", "Lecture" + i);
 			if( fsrv != FSReturnVals.Success ){
 				System.out.println("Unit test 3 result: fail!");
 	    		return;
@@ -47,16 +47,16 @@ public class UnitTest3 {
 		System.out.println(TestName + "CreateFile /Shahram/2/Lecture1, /Shahram/2/Lecture2, ...., /Shahram/2/Lecture15");
 		String dir2 = "Shahram";
 		for(int i = 1; i <= N; i++){
-			fsrv = cfs.CreateFile("/" + dir2 + "/2i/", "Lecture" + i);
+			fsrv = cfs.CreateFile("csci485/" + dir2 + "/2/", "Lecture" + i);
 			if( fsrv != FSReturnVals.Success ){
-				System.out.println("Unit test 3 result: fail!");
+				System.out.println("Unit test 3 result: fail! " + fsrv);
 	    		return;
 			}
 		}
 		
 		System.out.println(TestName + "DeleteFile /Shahram/2/Lecture1, /Shahram/2/Lecture2, ...., /Shahram/2/Lecture15");
 		for(int i = 1; i <= N; i++){
-			fsrv = cfs.DeleteFile("/" + dir2 + "/2i/", "Lecture" + i);
+			fsrv = cfs.DeleteFile("csci485/" + dir2 + "/2/", "Lecture" + i);
 			if( fsrv != FSReturnVals.Success ){
 				System.out.println("Unit test 3 result: fail!");
 	    		return;

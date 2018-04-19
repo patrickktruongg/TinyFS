@@ -1,6 +1,7 @@
 package com.client;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -93,6 +94,7 @@ public class ClientFS {
 			return FSReturnVals.SrcDirNotExistent;
 		}
 		else {
+			//Check to see if NewName already exists in the parent directory as a file
 			File parent = srcFile.getParentFile();
 			File[] fs = parent.listFiles();
 			for(int i = 0; i < fs.length; i++) {
@@ -100,6 +102,8 @@ public class ClientFS {
 					return FSReturnVals.DestDirExists;
 				}
 			}
+			
+			//Rename file
 			File newPath = new File(parent.getPath() + NewName);
 			srcFile.renameTo(newPath);
 		}
@@ -147,7 +151,36 @@ public class ClientFS {
 	 * Example usage: Createfile("/Shahram/CSCI485/Lecture1/", "Intro.pptx")
 	 */
 	public FSReturnVals CreateFile(String tgtdir, String filename) {
-		return null;
+		
+		//Check if the directory src exists
+		File dir = new File(tgtdir);
+		if(!dir.exists()) {
+			return FSReturnVals.SrcDirNotExistent;
+		}
+		else {
+			/*
+			File[] fs = dir.listFiles();
+			for(int i = 0; i < fs.length; i++) {
+				if(fs[i].getName().equals(filename)) {
+					return FSReturnVals.FileExists;
+				}
+			}
+			*/
+			//Create file
+			File file = new File(tgtdir + "/" + filename);
+			try {
+				if(file.createNewFile()) {
+					return FSReturnVals.Success;
+				} else {
+					return FSReturnVals.FileExists; 
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return FSReturnVals.FileExists;
+			}
+		}
+
 	}
 
 	/**
@@ -158,7 +191,32 @@ public class ClientFS {
 	 * Example usage: DeleteFile("/Shahram/CSCI485/Lecture1/", "Intro.pptx")
 	 */
 	public FSReturnVals DeleteFile(String tgtdir, String filename) {
-		return null;
+		//Check if the directory src exists
+		File dir = new File(tgtdir);
+		if(!dir.exists()) {
+			return FSReturnVals.SrcDirNotExistent;
+		}
+		else {
+			//Check if the file exists or not
+			File[] fs = dir.listFiles();
+			boolean exists = false;
+			for(int i = 0; i < fs.length; i++) {
+				if(fs[i].getName().equals(filename)) {
+					exists = true;
+				}
+			}
+			if(!exists) {
+				return FSReturnVals.FileDoesNotExist;
+			}
+			
+			//Try to delete the file
+			File file = new File(tgtdir + "/" + filename);
+			if(file.delete()) {
+				return FSReturnVals.Success;
+			} else {
+				return FSReturnVals.Fail; 
+			}
+		}
 	}
 
 	/**
