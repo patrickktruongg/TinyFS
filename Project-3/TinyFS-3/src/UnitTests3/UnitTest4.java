@@ -61,9 +61,13 @@ public class UnitTest4 {
 		FSReturnVals retRR = crec.ReadFirstRecord(fh, r1);
 		int cntr = 1;
 		ArrayList<RID> vect = new ArrayList<RID>();
+		if(r1.getRID() == null) {
+			System.out.println("r1 RID is null");
+		}
 		while (r1.getRID() != null){
 			TinyRec r2 = new TinyRec();
 			FSReturnVals retval = crec.ReadNextRecord(fh, r1.getRID(), r2);
+			//System.out.println("r1 is: " + r1.getRID().getID() + " and r2 is: " + r2.getRID().getID());
 			//if(retval != FSReturnVals.Success){
 			if(r2.getRID() != null){
 				byte[] head = new byte[4];
@@ -78,6 +82,7 @@ public class UnitTest4 {
 				r1 = r2;
 				cntr++;
 			} else {
+				//System.out.println("What");
 				r1.setRID(null);
 			}
 				

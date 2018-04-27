@@ -242,6 +242,7 @@ public class ClientFS {
 		int numChunks = master.getNumChunks(FilePath);
 		ofh.setFile(FilePath);
 		if(numChunks == 0) {
+			//System.out.println("Num chunks was zero and file path is: " + ofh.getFile());
 			return FSReturnVals.Success;
 		}
 
@@ -279,6 +280,8 @@ public class ClientFS {
 					RID rid = new RID();
 					rid.setID(chunk.getChunkHandle() + (chunk.getNumRecords() + 1));
 					rid.setChunkHandle(chunk.getChunkHandle());
+					System.out.println("RID ID: " + rid.getID());
+					System.out.println("Chunk handle: " + rid.getChunkHandle());
 					record.setRID(rid);
 					
 					chunk.addRecord(record, size);
@@ -294,7 +297,7 @@ public class ClientFS {
 			e.printStackTrace();
 		}
 		
-		ofh.setChunks(chunks);
+		//ofh.setChunks(chunks);
 		
 		return FSReturnVals.Success;
 		
@@ -309,6 +312,17 @@ public class ClientFS {
 	public FSReturnVals CloseFile(FileHandle ofh) {
 		if(ofh == null) {
 			return FSReturnVals.BadHandle;
+		}
+		
+		File file = new File(ofh.getFile());
+		file.delete();
+		
+		File redo = new File(ofh.getFile());
+		try {
+			redo.createNewFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		return FSReturnVals.Success;

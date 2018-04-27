@@ -64,14 +64,21 @@ public class ClientRec {
 	public FSReturnVals ReadFirstRecord(FileHandle ofh, TinyRec rec){
 		
 		if(ofh == null) {
+			System.out.println("Null filehandle");
 			return FSReturnVals.BadHandle;
 		}
 		
 		TinyRec record = ofh.readFirstRecord();
 		
 		if(record == null) {
+			System.out.println("Null record");
 			return FSReturnVals.RecDoesNotExist;
 		}
+		
+		rec.setRID(record.getRID());
+		rec.setPayload(record.getPayload());
+	
+		//System.out.println("Success! Record id is: " + rec.getRID().getID() + " and handle: " + rec.getRID().getChunkHandle());
 		
 		return FSReturnVals.Success;
 	}
@@ -99,11 +106,13 @@ public class ClientRec {
 			return FSReturnVals.BadHandle;
 		}
 		
-		rec = ofh.readNextRecord(pivot);
-		
-		if(rec == null) {
+		TinyRec record = ofh.readNextRecord(pivot);
+		if(record == null) {
 			return FSReturnVals.RecDoesNotExist;
 		}
+		
+		rec.setRID(record.getRID());
+		rec.setPayload(record.getPayload());
 		
 		return FSReturnVals.Success;
 
