@@ -75,6 +75,8 @@ public class ClientRec {
 			return FSReturnVals.RecDoesNotExist;
 		}
 		
+
+		
 		rec.setRID(record.getRID());
 		rec.setPayload(record.getPayload());
 	
@@ -90,7 +92,26 @@ public class ClientRec {
 	 * Example usage: ReadLastRecord(FH1, tinyRec)
 	 */
 	public FSReturnVals ReadLastRecord(FileHandle ofh, TinyRec rec){
-		return null;
+		
+		if(ofh == null) {
+			System.out.println("Null filehandle");
+			return FSReturnVals.BadHandle;
+		}
+		
+		TinyRec record = ofh.readLastRecord();
+		
+		if(record == null) {
+			System.out.println("Null record");
+			return FSReturnVals.RecDoesNotExist;
+		}
+		
+
+		
+		rec.setRID(record.getRID());
+		rec.setPayload(record.getPayload());
+	
+		return FSReturnVals.Success;
+		
 	}
 
 	/**
@@ -127,7 +148,19 @@ public class ClientRec {
 	 * recn-1, tinyRec2) 3. ReadPrevRecord(FH1, recn-2, tinyRec3)
 	 */
 	public FSReturnVals ReadPrevRecord(FileHandle ofh, RID pivot, TinyRec rec){
-		return null;
+		if(ofh == null) {
+			return FSReturnVals.BadHandle;
+		}
+		
+		TinyRec record = ofh.readPrevRecord(pivot);
+		if(record == null) {
+			return FSReturnVals.RecDoesNotExist;
+		}
+		
+		rec.setRID(record.getRID());
+		rec.setPayload(record.getPayload());
+		
+		return FSReturnVals.Success;
 	}
 
 }

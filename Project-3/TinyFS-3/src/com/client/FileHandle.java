@@ -112,6 +112,64 @@ public class FileHandle {
 		return records.get(counter);
 	}
 	
+	public TinyRec readLastRecord() {
+		if(mChunks.size() == 0) {
+			System.out.println("Failed chunk list is zero");
+			return null;
+		}
+		boolean flag = false;
+		int counter = mChunks.get(0).getRecords().size() - 1;
+		while(!flag) {
+			if(counter < 0) {
+				System.out.println("Failed out of bounds");
+				return null;
+			}
+			if(mChunks.get(0).getRecords().get(counter).isDeleted()) {
+				counter--;
+			}
+			else {
+				flag = true;
+			}
+		}
+		//System.out.println("First record id: " + mChunks.get(0).getRecords().get(counter).getRID().getID());
+		return mChunks.get(0).getRecords().get(counter);
+	}
+	
+	public TinyRec readPrevRecord(RID pivot) {
+		if(mChunks.size() == 0) {
+			System.out.println("Failed chunk list is zero");
+			return null;
+		}
+		if(pivot.getChunkHandle() == null) {
+			System.out.println("Failed no chunk handle");
+			return null;
+		}
+		
+		List<TinyRec> records = mChunks.get(0).getRecords();
+		String rid = pivot.getID();
+		int index = Integer.valueOf(rid.substring(pivot.getChunkHandle().length(), rid.length()));
+		
+		boolean flag = false;
+		int counter = index - 1;
+		//System.out.println("Index: " + index + " and counter: " + counter);
+		while(!flag) {
+			//System.out.println("Counter: " + counter);
+			if(counter < 0) {
+				//System.out.println("Failed out of bounds");
+				return null;
+			}
+			if(mChunks.get(0).getRecords().get(counter).isDeleted()) {
+				//System.out.println("Counter++!");
+				counter--;
+			}
+			else {
+				flag = true;
+			}
+		}
+		//System.out.println("Counter in the end: " + counter + " and id: " + records.get(counter - 1).getRID().getID());
+		return records.get(counter);
+	}
+	
 	public boolean appendRecord(byte[] payload, RID RecordID) {
 		
 		if(mChunks.size() == 0) {

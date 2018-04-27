@@ -25,19 +25,19 @@ public class UnitTest5 {
 		System.out.println(TestName + "Same as Unit Test 4 except that it manipulates the records starting with the last record, going backwards, and delete the even numbered records using their first four bytes.");
 		String dir1 = "Shahram";
 		ClientFS cfs = new ClientFS();
-		FSReturnVals fsrv = cfs.CreateDir("/", dir1);
+		FSReturnVals fsrv = cfs.CreateDir("csci485/", dir1);
 		if ( fsrv != FSReturnVals.Success ){
-			System.out.println("Unit test 5 result: fail!");
+			System.out.println("Unit test 5 result part 1: fail!");
     		return;
 		}
-		fsrv = cfs.CreateFile("/" + dir1 + "/", "emp1");
+		fsrv = cfs.CreateFile("csci485/" + dir1 + "/", "emp1");
 		if( fsrv != FSReturnVals.Success ){
-			System.out.println("Unit test 5 result: fail!");
+			System.out.println("Unit test 5 result part 2: fail!");
     		return;
 		}
 		//get the file handle first
 		FileHandle fh = new FileHandle();
-		FSReturnVals ofd = cfs.OpenFile("/" + dir1 + "/emp1", fh);
+		FSReturnVals ofd = cfs.OpenFile("csci485/" + dir1 + "/emp1", fh);
 		byte[] payload = null;
 		int intSize = Integer.SIZE / Byte.SIZE;	// 4 bytes
 		ClientRec crec = new ClientRec();
@@ -53,7 +53,7 @@ public class UnitTest5 {
 			crec.AppendRecord(fh, payload, rid);
 		}
 		fsrv = cfs.CloseFile(fh);
-		ofd = cfs.OpenFile("/" + dir1 + "/emp1", fh);
+		ofd = cfs.OpenFile("csci485/" + dir1 + "/emp1", fh);
 		TinyRec r1 = new TinyRec();
 		FSReturnVals retRR = crec.ReadLastRecord(fh, r1);
 		int cntr = 1;
@@ -79,18 +79,18 @@ public class UnitTest5 {
 		for(int i = 0; i < vect.size(); i++){
 			fsrv = crec.DeleteRecord(fh, vect.get(i));
 			if(fsrv != FSReturnVals.Success){
-				System.out.println("Unit test 5 result: failed to delete the record!");
+				System.out.println("Unit test 5 result part 3: failed to delete the record!");
 				return;
 			}
 		}
 		
 		fsrv = cfs.CloseFile(fh);
 		if(cntr != NumRecs){
-			System.out.println("Unit test 5 result: fail!");
+			System.out.println("Unit test 5 result part 4: fail! ");
     		return;
 		}
 		
-		ofd = cfs.OpenFile("/" + dir1 + "/emp1", fh);
+		ofd = cfs.OpenFile("csci485/" + dir1 + "/emp1", fh);
 		r1 = new TinyRec();
 		retRR = crec.ReadLastRecord(fh, r1);
 		while (r1.getRID() != null){
