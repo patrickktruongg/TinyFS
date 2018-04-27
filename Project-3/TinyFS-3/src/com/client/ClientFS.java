@@ -1,10 +1,15 @@
 package com.client;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.chunkserver.ChunkServer;
+import com.master.Master;
 
 public class ClientFS {
 
@@ -152,6 +157,7 @@ public class ClientFS {
 	 */
 	public FSReturnVals CreateFile(String tgtdir, String filename) {
 		
+		Master master = Master.getInstance();
 		//Check if the directory src exists
 		File dir = new File(tgtdir);
 		if(!dir.exists()) {
@@ -167,9 +173,10 @@ public class ClientFS {
 			}
 			*/
 			//Create file
-			File file = new File(tgtdir + "/" + filename);
+			File file = new File(tgtdir + filename);
 			try {
 				if(file.createNewFile()) {
+					master.addFile(tgtdir + filename);
 					return FSReturnVals.Success;
 				} else {
 					return FSReturnVals.FileExists; 
@@ -227,7 +234,71 @@ public class ClientFS {
 	 * Example usage: OpenFile("/Shahram/CSCI485/Lecture1/Intro.pptx", FH1)
 	 */
 	public FSReturnVals OpenFile(String FilePath, FileHandle ofh) {
-		return null;
+		
+		Master master = Master.getInstance();
+		if(!master.fileExists(FilePath)) {
+			return FSReturnVals.FileDoesNotExist;
+		}
+		int numChunks = master.getNumChunks(FilePath);
+		ofh.setFile(FilePath);
+		if(numChunks == 0) {
+			return FSReturnVals.Success;
+		}
+
+		
+		List<Chunk> chunks = new ArrayList<Chunk>();
+		int offset = 0;
+		
+		try {
+			
+			RandomAccessFile f = new RandomAccessFile(FilePath, "rw");
+			
+			for(int i = 0; i < numChunks; i++) {
+				Chunk chunk = new Chunk(FilePath + i);
+				
+				//Parse the header
+				int numRecords = f.readInt();
+				int numBytesFree = f.readInt();
+				int freeOffset = f.readInt();
+				
+				chunk.setNumBytesFree(numBytesFree);
+				chunk.setFreeOffset(freeOffset);
+				
+				offset += 12; //move forward to data
+				
+				//Parse the records
+				for(int j = 0; j < numRecords; j++) {
+					int size = f.readInt();
+					offset += 4;
+					
+					byte[] b = new byte[size];
+					f.read(b, offset, size);
+					TinyRec record = new TinyRec();
+					record.setPayload(b);
+					
+					RID rid = new RID();
+					rid.setID(chunk.getChunkHandle() + (chunk.getNumRecords() + 1));
+					rid.setChunkHandle(chunk.getChunkHandle());
+					record.setRID(rid);
+					
+					chunk.addRecord(record, size);
+				}
+				
+				chunks.add(chunk);
+				
+			}
+			
+			f.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		ofh.setChunks(chunks);
+		
+		return FSReturnVals.Success;
+		
+
 	}
 
 	/**
@@ -236,7 +307,11 @@ public class ClientFS {
 	 * Example usage: CloseFile(FH1)
 	 */
 	public FSReturnVals CloseFile(FileHandle ofh) {
-		return null;
+		if(ofh == null) {
+			return FSReturnVals.BadHandle;
+		}
+		
+		return FSReturnVals.Success;
 	}
 
 }

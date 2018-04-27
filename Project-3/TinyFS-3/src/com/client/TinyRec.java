@@ -17,4 +17,19 @@ public class TinyRec {
 	public void setRID(RID inputID) {
 		ID = inputID;
 	}
+	
+	public boolean isDeleted() {
+		if(payload[0] == 0) {
+			return true;
+		}
+		return false;
+	}
+	
+	public void delete() {
+		payload[0] = 0;
+	}
+	
+	public void undoDelete() {
+		payload[0] = 1;
+	}
 }

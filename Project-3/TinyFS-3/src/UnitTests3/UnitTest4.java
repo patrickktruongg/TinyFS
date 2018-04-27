@@ -9,6 +9,7 @@ import com.client.ClientRec;
 import com.client.FileHandle;
 import com.client.RID;
 import com.client.TinyRec;
+import com.master.Master;
 
 /**
  * UnitTest4 for Part 3 of TinyFS
@@ -22,20 +23,21 @@ public class UnitTest4 {
 	
 	public static void main(String[] args) {
 		String dir1 = "Shahram";
+		Master master = Master.getInstance();
 		ClientFS cfs = new ClientFS();
-		FSReturnVals fsrv = cfs.CreateDir("/", dir1);
+		FSReturnVals fsrv = cfs.CreateDir("csci485/", dir1);
 		if ( fsrv != FSReturnVals.Success ){
-			System.out.println("Unit test 4 result: fail!");
+			System.out.println("Unit test 4 result part 1: fail!");
     		return;
 		}
-		fsrv = cfs.CreateFile("/" + dir1 + "/", "emp");
+		fsrv = cfs.CreateFile("csci485/" + dir1 + "/", "emp");
 		if( fsrv != FSReturnVals.Success ){
-			System.out.println("Unit test 4 result: fail!");
+			System.out.println("Unit test 4 result part 2: fail!");
     		return;
 		}
 		//get the file handle first
 		FileHandle fh = new FileHandle();
-		FSReturnVals ofd = cfs.OpenFile("/" + dir1 + "/emp", fh);
+		FSReturnVals ofd = cfs.OpenFile("csci485/" + dir1 + "/emp", fh);
 		byte[] payload = null;
 		int intSize = Integer.SIZE / Byte.SIZE;	// 4 bytes
 		ClientRec crec = new ClientRec();
@@ -54,7 +56,7 @@ public class UnitTest4 {
 		fsrv = cfs.CloseFile(fh);
 		
 		System.out.println(TestName + "Scan all records in a file");
-		ofd = cfs.OpenFile("/" + dir1 + "/emp", fh);
+		ofd = cfs.OpenFile("csci485/" + dir1 + "/emp", fh);
 		TinyRec r1 = new TinyRec();
 		FSReturnVals retRR = crec.ReadFirstRecord(fh, r1);
 		int cntr = 1;
@@ -86,19 +88,19 @@ public class UnitTest4 {
 		for(int i = 0; i < vect.size(); i++){
 			fsrv = crec.DeleteRecord(fh, vect.get(i));
 			if(fsrv != FSReturnVals.Success){
-				System.out.println("Unit test 4 result: failed to delete the record!");
+				System.out.println("Unit test 4 result part 3: failed to delete the record!");
 				return;
 			}
 		}
 		
 		fsrv = cfs.CloseFile(fh);
 		if(cntr != NumRecs){
-			System.out.println("Unit test 4 result: fail!");
+			System.out.println("Unit test 4 result part 4: fail! Found " + cntr + " records but wanted: " + NumRecs);
     		return;
 		}
 		
 		System.out.println(TestName + "Scan the file and verify there are only even numbered records using their first four bytes.");
-		ofd = cfs.OpenFile("/" + dir1 + "/emp", fh);
+		ofd = cfs.OpenFile("csci485/" + dir1 + "/emp", fh);
 		r1 = new TinyRec();
 		retRR = crec.ReadFirstRecord(fh, r1);
 		while (r1.getRID() != null){
@@ -110,7 +112,7 @@ public class UnitTest4 {
 				int value = ((head[0] & 0xFF) << 24) | ((head[1] & 0xFF) << 16)
 				        | ((head[2] & 0xFF) << 8) | (head[3] & 0xFF);
 				if(value % 2 != 0){
-					System.out.println("Unit test 4 result: fail!  Found an odd numbered record with value " + value + ".");
+					System.out.println("Unit test 4 result part 5: fail!  Found an odd numbered record with value " + value + ".");
 		    		return;
 				}
 				r1 = r2;
