@@ -3,6 +3,7 @@ package com.client;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -187,7 +188,6 @@ public class FileHandle {
 		
 		byte[] revisedPayload = new byte[payload.length + 1];
 		revisedPayload[0] = 1; //an alive record
-		//revisedPayload[1] = 1; //not a sub record
 		for(int i = 0; i < payload.length; i++) {
 			revisedPayload[i+1] = payload[i];
 		}
@@ -195,9 +195,7 @@ public class FileHandle {
 		RecordID.setChunkHandle(chunk.getChunkHandle());
 		record.setPayload(revisedPayload);
 		record.setRID(RecordID);
-		//System.out.println("RID ID: " + record.getRID().getID());
-		//System.out.println("Chunk handle: " + record.getRID().getChunkHandle());
-		
+
 		chunk.addRecord(record, revisedPayload.length);
 		
 		try {

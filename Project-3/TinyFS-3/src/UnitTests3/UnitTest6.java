@@ -31,7 +31,7 @@ public class UnitTest6 {
 		
 		
 		ClientFS cfs = new ClientFS();
-		FSReturnVals fsrv = cfs.CreateDir("/", dir1);
+		FSReturnVals fsrv = cfs.CreateDir("csci485/", dir1);
 		if ( fsrv != FSReturnVals.Success ){
 			System.out.println("Unit test 6 result: fail!");
     		return;
@@ -41,12 +41,12 @@ public class UnitTest6 {
 		
 		System.out.println(TestName + "Create two files for superheroes: One for the name and the other for their images.");
 		//Create two TinyFS filenames, one for the images and a second for the names
-		fsrv = cfs.CreateFile("/" + dir1 + "/", TinyFileName + ".img");
+		fsrv = cfs.CreateFile("csci485/" + dir1 + "/", TinyFileName + ".img");
 		if( fsrv != FSReturnVals.Success ){
 			System.out.println("Unit test 6 result: fail!");
     		return;
 		}
-		fsrv = cfs.CreateFile("/" + dir1 + "/", TinyFileName + ".names");
+		fsrv = cfs.CreateFile("csci485/" + dir1 + "/", TinyFileName + ".names");
 		if( fsrv != FSReturnVals.Success ){
 			System.out.println("Unit test 6 result: fail!");
     		return;
@@ -56,8 +56,8 @@ public class UnitTest6 {
 		//Open the two files
 		FileHandle ImageFH = new FileHandle();
 		FileHandle NameFH = new FileHandle();
-		FSReturnVals imgofd = cfs.OpenFile("/" + dir1 + "/" + TinyFileName + ".img", ImageFH);
-		FSReturnVals nameofd = cfs.OpenFile("/" + dir1 + "/" + TinyFileName + ".names", NameFH);
+		FSReturnVals imgofd = cfs.OpenFile("csci485/" + dir1 + "/" + TinyFileName + ".img", ImageFH);
+		FSReturnVals nameofd = cfs.OpenFile("csci485/" + dir1 + "/" + TinyFileName + ".names", NameFH);
 		
 		for(int i = 0; i < SuperHeros.length; i++){
 			String filename = SuperHeros[i];  //This is the file in the local directory
@@ -106,8 +106,8 @@ public class UnitTest6 {
 		//Check that the information was inserted correctly
 		//Open the image and name files
 		//Read the records and compare the payloads
-		imgofd = cfs.OpenFile("/" + dir1 + "/" + TinyFileName + ".img", ImageFH);
-		nameofd = cfs.OpenFile("/" + dir1 + "/" + TinyFileName + ".names", NameFH);
+		imgofd = cfs.OpenFile("csci485/" + dir1 + "/" + TinyFileName + ".img", ImageFH);
+		nameofd = cfs.OpenFile("csci485/" + dir1 + "/" + TinyFileName + ".names", NameFH);
 		byte[] imagePL = null, namePL = null;
 		TinyRec img1 = new TinyRec();
 		FSReturnVals retImg1 = crec.ReadFirstRecord(ImageFH, img1);
@@ -140,20 +140,20 @@ public class UnitTest6 {
 			byte[] contentBytes = getBytesFromFile(new File("SuperHeros/" + filename + ".jpg"), size);
 			byte[] sizeBytes = ByteBuffer.allocate(intSize).putInt((int)size).array();
 			imagePL = img1.getPayload();
-			for(int j = 0; j < imagePL.length; j++){
+			for(int j = 0; j < imagePL.length - 1; j++){
 				if(j < 4){
-					if(imagePL[j] != indexBytes[j]){
-						System.out.println("Unit test 6 result: fail!");
+					if(imagePL[j+1] != indexBytes[j]){
+						System.out.println("Unit test 6 result part 1: fail!");
 						return;
 					}
 				}else if(j < 8){
-					if(imagePL[j] != sizeBytes[j - 4]){
-						System.out.println("Unit test 6 result: fail!");
+					if(imagePL[j+1] != sizeBytes[j - 4]){
+						System.out.println("Unit test 6 result part 2: fail!");
 						return;
 					}
 				}else{
-					if(imagePL[j] != contentBytes[j - 8]){
-						System.out.println("Unit test 6 result: fail!");
+					if(imagePL[j+1] != contentBytes[j - 8]){
+						System.out.println("Unit test 6 result part 3: fail!");
 						return;
 					}
 				}
@@ -163,20 +163,20 @@ public class UnitTest6 {
 			size = sizeBytes.length;
 			sizeBytes = ByteBuffer.allocate(intSize).putInt(sizeBytes.length).array();
 			namePL = name1.getPayload();
-			for(int j = 0; j < namePL.length; j++){
+			for(int j = 0; j < namePL.length - 1; j++){
 				if(j < 4){
-					if(namePL[j] != indexBytes[j]){
-						System.out.println("Unit test 6 result: fail!");
+					if(namePL[j+1] != indexBytes[j]){
+						System.out.println("Unit test 6 result part 4: fail!");
 						return;
 					}
 				}else if(j < 8){
-					if(namePL[j] != sizeBytes[j - 4]){
-						System.out.println("Unit test 6 result: fail!");
+					if(namePL[j+1] != sizeBytes[j - 4]){
+						System.out.println("Unit test 6 result part 5: fail!");
 						return;
 					}
 				}else{
-					if(namePL[j] != contentBytes[j - 8]){
-						System.out.println("Unit test 6 result: fail!");
+					if(namePL[j+1] != contentBytes[j - 8]){
+						System.out.println("Unit test 6 result part 6: fail!");
 						return;
 					}
 				}
